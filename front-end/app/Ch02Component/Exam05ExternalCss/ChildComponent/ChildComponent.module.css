@@ -1,0 +1,15 @@
+.example {
+  background-color: #dcfce7;
+  color: #14532d;
+  padding: 16px;
+  border-radius: 8px;
+  font-size: 20px;
+  font-weight: bold;
+}
+
+@media (prefers-color-scheme: dark) {
+  .example {
+    background-color: #14532d;
+    color: #bbf7d0;
+  }
+}

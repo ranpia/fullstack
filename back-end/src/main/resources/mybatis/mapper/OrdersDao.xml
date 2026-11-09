@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mycompany.demo.database.dao.OrdersDao">
+    <insert id="insert" parameterType="Orders" useGeneratedKeys="true" keyProperty="orderId" keyColumn="order_id">
+        INSERT INTO orders (member_id, ordered_at)
+        VALUES (#{memberId}, COALESCE(#{orderedAt,jdbcType=TIMESTAMP}, CURRENT_TIMESTAMP))
+    </insert>
+
+    <select id="selectByOrderId" resultType="Orders">
+        SELECT order_id, member_id, ordered_at
+        FROM orders
+        WHERE order_id = #{orderId}
+    </select>
+
+    <sql id="ordersFilter">
+        <where>
+            <if test="where != null">
+                <if test="where.memberId != null and where.memberId != ''">
+                    AND member_id = #{where.memberId}
+                </if>
+                <if test="where.orderId != null">
+                    AND order_id = #{where.orderId}
+                </if>
+            </if>
+        </where>
+    </sql>
+
+    <select id="selectCount" resultType="_int">
+        SELECT COUNT(*) FROM orders
+        <include refid="ordersFilter"/>
+    </select>
+
+    <select id="selectByPage" resultType="Orders">
+        SELECT order_id, member_id, ordered_at
+        FROM orders
+        <include refid="ordersFilter"/>
+        ORDER BY ordered_at DESC, order_id DESC
+        OFFSET #{pager.startRowIndex} ROWS FETCH NEXT #{pager.rowsPerPage} ROWS ONLY
+    </select>
+
+    <update id="update" parameterType="Orders">
+        UPDATE orders
+        SET member_id = #{memberId}
+        WHERE order_id = #{orderId}
+    </update>
+
+    <delete id="deleteByOrderId">
+        DELETE FROM orders
+        WHERE order_id = #{orderId}
+    </delete>
+</mapper>

@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mycompany.demo.database.dao.SellerDao">
+    <insert id="insert" parameterType="Seller" useGeneratedKeys="true" keyProperty="sellerId" keyColumn="seller_id">
+        INSERT INTO seller (seller_name, email, phone, registered_at)
+        VALUES (#{sellerName}, #{email}, #{phone}, COALESCE(#{registeredAt,jdbcType=TIMESTAMP}, CURRENT_TIMESTAMP))
+    </insert>
+
+    <select id="selectBySellerId" resultType="Seller">
+        SELECT seller_id, seller_name, email, phone, registered_at
+        FROM seller
+        WHERE seller_id = #{sellerId}
+    </select>
+
+    <sql id="sellerFilter">
+        <where>
+            <if test="where != null">
+                <if test="where.sellerId != null">
+                    AND seller_id = #{where.sellerId}
+                </if>
+                <if test="where.sellerName != null and where.sellerName != ''">
+                    AND seller_name LIKE '%' || #{where.sellerName} || '%'
+                </if>
+                <if test="where.email != null and where.email != ''">
+                    AND email = #{where.email}
+                </if>
+            </if>
+        </where>
+    </sql>
+
+    <select id="selectCount" resultType="_int">
+        SELECT COUNT(*) FROM seller
+        <include refid="sellerFilter"/>
+    </select>
+
+    <select id="selectByPage" resultType="Seller">
+        SELECT seller_id, seller_name, email, phone, registered_at
+        FROM seller
+        <include refid="sellerFilter"/>
+        ORDER BY registered_at DESC, seller_id DESC
+        OFFSET #{pager.startRowIndex} ROWS FETCH NEXT #{pager.rowsPerPage} ROWS ONLY
+    </select>
+
+    <update id="update" parameterType="Seller">
+        UPDATE seller
+        SET seller_name = #{sellerName},
+            email = #{email},
+            phone = #{phone}
+        WHERE seller_id = #{sellerId}
+    </update>
+
+    <delete id="deleteBySellerId">
+        DELETE FROM seller
+        WHERE seller_id = #{sellerId}
+    </delete>
+</mapper>

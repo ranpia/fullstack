@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+    <settings>
+        <!-- DB의 snake_case 컬럼명을 Java의 camelCase 필드명으로 매핑 -->
+        <setting name="mapUnderscoreToCamelCase" value="true"/>
+        <setting name="jdbcTypeForNull" value="NULL"/>
+    </settings>
+
+    <typeAliases>
+        <package name="com.mycompany.demo.database.entity"/>
+        <package name="com.mycompany.demo.database.dto"/>
+    </typeAliases>
+</configuration>

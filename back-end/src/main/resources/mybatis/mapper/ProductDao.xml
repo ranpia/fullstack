@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.mycompany.demo.database.dao.ProductDao">
+    <insert id="insert" parameterType="Product" useGeneratedKeys="true" keyProperty="productId" keyColumn="product_id">
+        INSERT INTO product (product_name, price, seller_id)
+        VALUES (#{productName}, #{price}, #{sellerId})
+    </insert>
+
+    <select id="selectByProductId" resultType="Product">
+        SELECT product_id, product_name, price, seller_id
+        FROM product
+        WHERE product_id = #{productId}
+    </select>
+
+    <sql id="productFilter">
+        <where>
+            <if test="where != null">
+                <if test="where.sellerId != null">
+                    AND seller_id = #{where.sellerId}
+                </if>
+                <if test="where.productId != null">
+                    AND product_id = #{where.productId}
+                </if>
+                <if test="where.productName != null and where.productName != ''">
+                    AND product_name LIKE '%' || #{where.productName} || '%'
+                </if>
+            </if>
+        </where>
+    </sql>
+
+    <select id="selectCount" resultType="_int">
+        SELECT COUNT(*) FROM product
+        <include refid="productFilter"/>
+    </select>
+
+    <select id="selectByPage" resultType="Product">
+        SELECT product_id, product_name, price, seller_id
+        FROM product
+        <include refid="productFilter"/>
+        ORDER BY product_id DESC
+        OFFSET #{pager.startRowIndex} ROWS FETCH NEXT #{pager.rowsPerPage} ROWS ONLY
+    </select>
+
+    <update id="update" parameterType="Product">
+        UPDATE product
+        SET product_name = #{productName},
+            price = #{price},
+            seller_id = #{sellerId}
+        WHERE product_id = #{productId}
+    </update>
+
+    <delete id="deleteByProductId">
+        DELETE FROM product
+        WHERE product_id = #{productId}
+    </delete>
+</mapper>

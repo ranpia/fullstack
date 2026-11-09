@@ -1,0 +1,73 @@
+// Generated from sql/01_create_tables.sql by node generate-schema.mjs
+// review.date must be quoted as review."date" in Oracle SQL.
+Project oracle_shop {
+  database_type: 'Oracle'
+}
+
+Table review [note: '상품 후기 게시판'] {
+  review_id number(19) [pk, not null, increment, note: '게시물 번호']
+  title "VARCHAR2(200 CHAR)" [not null, note: '게시물 제목']
+  content clob [not null, note: '게시물 내용']
+  writer "VARCHAR2(50 CHAR)" [not null, note: '작성자 회원 아이디']
+  "date" timestamp [not null, default: `CURRENT_TIMESTAMP`, note: '게시물 작성 일시']
+  product_id number(19) [not null, note: '후기 대상 상품 번호']
+  file_name "VARCHAR2(255 CHAR)" [note: '첨부 파일 이름']
+  file_type "VARCHAR2(255 CHAR)" [note: '첨부 파일 MIME 타입']
+  file_data blob [note: '첨부 파일 바이너리 데이터']
+}
+
+Table member [note: '회원 정보'] {
+  member_id "VARCHAR2(50 CHAR)" [pk, not null, note: '로그인에 사용하는 회원 아이디']
+  member_name "VARCHAR2(100 CHAR)" [not null, note: '회원 이름']
+  password "VARCHAR2(255 CHAR)" [not null, note: '단방향 해시로 저장한 비밀번호']
+  email "VARCHAR2(254 CHAR)" [note: '회원 이메일 주소']
+  joined_at timestamp [not null, default: `CURRENT_TIMESTAMP`, note: '회원가입 일시']
+}
+
+Table order_item [note: '주문에 포함된 상품 정보'] {
+  order_id number(19) [not null, note: '주문 번호']
+  product_id number(19) [not null, note: '주문한 상품 번호']
+  quantity number(19) [not null, note: '주문 수량']
+  unit_price number(12,2) [not null, note: '주문 당시 상품 한 개의 가격']
+
+  indexes {
+    (order_id, product_id) [pk]
+  }
+
+  checks {
+    `unit_price >= 0` [name: 'ck_order_item_price']
+    `quantity > 0` [name: 'ck_order_item_quantity']
+  }
+}
+
+Table orders [note: '회원의 주문 정보'] {
+  order_id number(19) [pk, not null, increment, note: '주문 번호']
+  member_id "VARCHAR2(50 CHAR)" [not null, note: '주문한 회원 아이디']
+  ordered_at timestamp [not null, default: `CURRENT_TIMESTAMP`, note: '주문 일시']
+}
+
+Table product [note: '상품 정보'] {
+  product_id number(19) [pk, not null, increment, note: '상품 번호']
+  product_name "VARCHAR2(200 CHAR)" [not null, note: '상품 이름']
+  price number(12,2) [not null, note: '현재 상품 가격']
+  seller_id number(19) [not null, note: '상품 판매자 번호']
+
+  checks {
+    `price >= 0` [name: 'ck_product_price']
+  }
+}
+
+Table seller [note: '상품 판매자 정보'] {
+  seller_id number(19) [pk, not null, increment, note: '판매자 번호']
+  seller_name "VARCHAR2(100 CHAR)" [not null, note: '판매자 이름 또는 상호명']
+  email "VARCHAR2(254 CHAR)" [note: '판매자 이메일 주소']
+  phone "VARCHAR2(20 CHAR)" [note: '판매자 연락처']
+  registered_at timestamp [not null, default: `CURRENT_TIMESTAMP`, note: '판매자 등록 일시']
+}
+
+Ref fk_review_member: review.writer > member.member_id
+Ref fk_review_product: review.product_id > product.product_id
+Ref fk_order_item_orders: order_item.order_id > orders.order_id
+Ref fk_order_item_product: order_item.product_id > product.product_id
+Ref fk_orders_member: orders.member_id > member.member_id
+Ref fk_product_seller: product.seller_id > seller.seller_id
